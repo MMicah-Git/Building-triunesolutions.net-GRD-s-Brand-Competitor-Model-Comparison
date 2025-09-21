@@ -15,6 +15,7 @@ A **Streamlit web app** to compare **Tuttle & Bailey (TNB) models** with competi
   - MetalAire
   - Nailor
   - Price
+  - Titus
 - Clean and interactive interface powered by [Streamlit](https://streamlit.io/).
 
 ## 📊 Data
