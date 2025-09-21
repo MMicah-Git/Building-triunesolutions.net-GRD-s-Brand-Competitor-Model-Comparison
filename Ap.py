@@ -13,8 +13,10 @@ st.set_page_config(
 # -------------------------------
 # Load Data
 # -------------------------------
-file_path = "C:/Users/micno/OneDrive/Desktop/triune/Restructured_Competitor_Comparison.xlsx"  # make sure this file is in the same folder
-df = pd.read_excel(file_path)
+url = "PK"
+df = pd.read_excel(url)
+#file_path = "C:/Users/micno/OneDrive/Desktop/triune/Restructured_Competitor_Comparison.xlsx"  # make sure this file is in the same folder
+#df = pd.read_excel(file_path)
 
 # Ensure consistent column names
 df.columns = df.columns.str.strip()
@@ -48,3 +50,4 @@ if not filtered_df.empty:
     st.dataframe(filtered_df, use_container_width=True)
 else:
     st.warning("No competitor data found for the selected model.")
+
