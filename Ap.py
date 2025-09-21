@@ -1,7 +1,3 @@
-streamlit>=1.24.1
-pandas>=2.0.3
-openpyxl>=3.1.2
-
 import streamlit as st
 import pandas as pd
 
