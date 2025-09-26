@@ -12,46 +12,46 @@ st.set_page_config(
 )
 
 # -------------------------------
-# Cache Decorator (compatible with all Streamlit versions)
+# Load Data (3-step fallback)
 # -------------------------------
-if hasattr(st, "cache_data"):
-    cache_func = st.cache_data
-else:
-    cache_func = st.cache  # fallback for older versions
+def load_data():
+    df = None
 
-# -------------------------------
-# Try GitHub load (cached)
-# -------------------------------
-@cache_func
-def load_from_github():
-    github_url = "Restructured_Data_With_Titus.xlsx"
-    df = pd.read_excel(github_url)
-    df.columns = df.columns.str.strip()
-    df = df.dropna(how="all")
-    if "TNB Model" in df.columns:
-        df = df[df["TNB Model"].notna()]
-    return df
+    # 1. Try GitHub
+    try:
+        github_url = "Restructured_Data_With_Titus.xlsx"
+        df = pd.read_excel(github_url)
+        st.success("✅ Loaded dataset from GitHub.")
+    except Exception:
+        st.warning("⚠️ Could not load from GitHub. Trying local file...")
 
-# -------------------------------
-# Load Data Logic
-# -------------------------------
-df = None
-try:
-    df = load_from_github()
-    st.success("✅ Loaded dataset from GitHub.")
-except Exception:
-    st.warning("⚠️ Could not load from GitHub. Please upload the file manually.")
-    uploaded_file = st.sidebar.file_uploader("📂 Upload Excel File", type=["xlsx"])
+    # 2. Try Local
+    if df is None:
+        try:
+            local_path = "data/Restructured_Data_With_Titus.xlsx"
+            df = pd.read_excel(local_path)
+            st.success("✅ Loaded dataset from local `/data/` folder.")
+        except Exception:
+            st.warning("⚠️ Could not load from local folder.")
+
+    # 3. Always Ask User (override)
+    uploaded_file = st.sidebar.file_uploader("📂 Upload Excel File (optional, overrides existing)", type=["xlsx"])
     if uploaded_file is not None:
         df = pd.read_excel(uploaded_file)
+        st.success("✅ Loaded dataset from uploaded file (manual override).")
+
+    # Clean Data
+    if df is not None:
         df.columns = df.columns.str.strip()
         df = df.dropna(how="all")
         if "TNB Model" in df.columns:
             df = df[df["TNB Model"].notna()]
-        st.success("✅ Loaded dataset from uploaded file.")
+    return df
+
+df = load_data()
 
 if df is None:
-    st.error("❌ No data available. Please upload an Excel file.")
+    st.error("❌ No data available. Please provide a valid Excel file.")
     st.stop()
 
 # -------------------------------
@@ -95,13 +95,12 @@ with tab1:
     BASE_BRAND = st.sidebar.selectbox("📌 Select a Base Brand:", options=brand_columns)
     BASE_BRAND_LABEL = brand_display_names.get(BASE_BRAND, BASE_BRAND)
 
-    # Search box for models
+    # Search box
     search_query = st.sidebar.text_input(f"🔎 Search {BASE_BRAND_LABEL} models:")
 
     base_models = df[BASE_BRAND].dropna().unique()
     base_models = sorted([str(m) for m in base_models])
 
-    # Filter models based on search query
     if search_query:
         base_models = [m for m in base_models if search_query.lower() in m.lower()]
 
@@ -123,7 +122,7 @@ with tab1:
                 sub_df = filtered_df[filtered_df[BASE_BRAND].astype(str) == model]
                 comparison_df = sub_df[[BASE_BRAND] + selected_brands].fillna("")
 
-                # 🔑 Drop rows where all competitor columns are blank
+                # Drop rows where all competitor columns are blank
                 comparison_df = comparison_df.loc[~(comparison_df[selected_brands] == "").all(axis=1)]
 
                 with st.expander(f"🔎 Results for {BASE_BRAND_LABEL}: **{model}**", expanded=False):
@@ -173,7 +172,6 @@ with tab2:
         if "chat_history" not in st.session_state:
             st.session_state.chat_history = []
 
-        # Display chat history
         for msg in st.session_state.chat_history:
             with st.chat_message(msg["role"]):
                 st.write(msg["content"])
@@ -183,7 +181,6 @@ with tab2:
             with st.chat_message("user"):
                 st.write(user_question)
 
-            # Context (first 50 rows for efficiency)
             context = df[brand_columns].fillna("").head(50).to_string(index=False)
 
             prompt = f"""
@@ -211,4 +208,3 @@ with tab2:
 
             except Exception as e:
                 st.error(f"❌ Chatbot Error: {e}")
-
