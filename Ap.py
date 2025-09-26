@@ -24,7 +24,7 @@ else:
 # -------------------------------
 @cache_func
 def load_from_github():
-    github_url = "https://raw.githubusercontent.com/MMicah-Git/Building-triunesolutions.net-GRD-s-Brand-Competitor-Model-Comparison/main/data/Restructured_Data_With_Titus.xlsx"
+    github_url = "Restructured_Data_With_Titus.xlsx"
     df = pd.read_excel(github_url)
     df.columns = df.columns.str.strip()
     df = df.dropna(how="all")
@@ -211,3 +211,4 @@ with tab2:
 
             except Exception as e:
                 st.error(f"❌ Chatbot Error: {e}")
+
