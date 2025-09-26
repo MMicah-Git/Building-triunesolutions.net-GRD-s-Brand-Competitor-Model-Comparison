@@ -17,7 +17,7 @@ st.set_page_config(
 @st.cache_data
 def load_data():
     # Make sure this file is inside your repo: /data/TNB_Competitor_Comparison.xlsx
-    df = pd.read_excel("data/TNB_Competitor_Comparison.xlsx")
+    df = pd.read_excel("data/Restructured_Data.xlsx")
     df.columns = df.columns.str.strip()
     return df
 
@@ -178,3 +178,4 @@ with tab2:
 
             except Exception as e:
                 st.error(f"❌ Chatbot Error: {e}")
+
