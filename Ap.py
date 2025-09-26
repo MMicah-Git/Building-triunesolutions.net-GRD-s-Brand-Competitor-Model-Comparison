@@ -26,7 +26,7 @@ else:
 def load_data():
     try:
         # 🔗 Direct link to raw GitHub file (replace with your repo & branch!)
-        github_url = "https://raw.githubusercontent.com/<your-username>/<your-repo>/main/data/Restructured_Data_With_Titus.xlsx"
+        github_url = "https://raw.githubusercontent.com/MMicah-Git/Building-triunesolutions.net-GRD-s-Brand-Competitor-Model-Comparison/main/data/Restructured_Data_With_Titus.xlsx"
         
         df = pd.read_excel(github_url)
         st.success("✅ Loaded dataset from GitHub.")
@@ -209,3 +209,4 @@ with tab2:
 
             except Exception as e:
                 st.error(f"❌ Chatbot Error: {e}")
+
