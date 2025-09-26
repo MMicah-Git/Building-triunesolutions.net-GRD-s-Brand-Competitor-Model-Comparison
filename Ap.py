@@ -14,10 +14,15 @@ st.set_page_config(
 # -------------------------------
 # Load Data
 # -------------------------------
+@st.cache_data
 def load_data(uploaded_file):
     if uploaded_file is not None:
         df = pd.read_excel(uploaded_file)
         df.columns = df.columns.str.strip()
+        # 🔑 Clean up blank rows
+        df = df.dropna(how="all")
+        if "TNB Model" in df.columns:
+            df = df[df["TNB Model"].notna()]
         return df
     else:
         return None
@@ -28,10 +33,12 @@ df = load_data(uploaded_file)
 if df is None:
     st.warning("⚠️ Please upload an Excel file to continue.")
     st.stop()
+
 # -------------------------------
 # Brand Setup
 # -------------------------------
-brand_columns = ["TNB Model", "Anemostat", "Carnes", "EH Price", "Krueger", "MetalAire", "Nailor", "Titus"]
+brand_columns = ["TNB Model", "Anemostat", "Carnes", "EH Price",
+                 "Krueger", "MetalAire", "Nailor", "Titus"]
 
 brand_display_names = {
     "TNB Model": "GRD's",
@@ -179,5 +186,3 @@ with tab2:
 
             except Exception as e:
                 st.error(f"❌ Chatbot Error: {e}")
-
-
