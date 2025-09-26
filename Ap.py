@@ -14,19 +14,20 @@ st.set_page_config(
 # -------------------------------
 # Load Data
 # -------------------------------
-@st.cache_data
-def load_data():
-    # Make sure this file is inside your repo: /data/TNB_Competitor_Comparison.xlsx
-    df = pd.read_excel("data/Restructured_Data.xlsx")
-    df.columns = df.columns.str.strip()
-    return df
+def load_data(uploaded_file):
+    if uploaded_file is not None:
+        df = pd.read_excel(uploaded_file)
+        df.columns = df.columns.str.strip()
+        return df
+    else:
+        return None
 
-try:
-    df = load_data()
-except FileNotFoundError:
-    st.error("❌ Excel file not found. Please make sure the file exists in /data/.")
+uploaded_file = st.sidebar.file_uploader("📂 Upload Excel File", type=["xlsx"])
+df = load_data(uploaded_file)
+
+if df is None:
+    st.warning("⚠️ Please upload an Excel file to continue.")
     st.stop()
-
 # -------------------------------
 # Brand Setup
 # -------------------------------
@@ -178,4 +179,5 @@ with tab2:
 
             except Exception as e:
                 st.error(f"❌ Chatbot Error: {e}")
+
 
