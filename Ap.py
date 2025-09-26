@@ -19,7 +19,7 @@ def load_data(uploaded_file):
     if uploaded_file is not None:
         df = pd.read_excel(uploaded_file)
         df.columns = df.columns.str.strip()
-        # 🔑 Clean up blank rows
+        # 🔑 Remove completely blank rows
         df = df.dropna(how="all")
         if "TNB Model" in df.columns:
             df = df[df["TNB Model"].notna()]
@@ -103,6 +103,9 @@ with tab1:
                 sub_df = filtered_df[filtered_df[BASE_BRAND].astype(str) == model]
                 comparison_df = sub_df[[BASE_BRAND] + selected_brands].fillna("")
 
+                # 🔑 Drop rows where all competitor columns are blank
+                comparison_df = comparison_df.loc[~(comparison_df[selected_brands] == "").all(axis=1)]
+
                 with st.expander(f"🔎 Results for {BASE_BRAND_LABEL}: **{model}**", expanded=False):
                     st.dataframe(
                         comparison_df,
@@ -112,6 +115,9 @@ with tab1:
 
             # Export option
             export_df = filtered_df[[BASE_BRAND] + selected_brands].fillna("")
+            # Drop blank rows from export too
+            export_df = export_df.loc[~(export_df[selected_brands] == "").all(axis=1)]
+
             st.download_button(
                 label="⬇️ Download results as CSV",
                 data=export_df.to_csv(index=False).encode("utf-8"),
