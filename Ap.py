@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from openai import OpenAI
+import openai
 
 # -------------------------------
 # Page Config
@@ -16,14 +16,15 @@ st.set_page_config(
 # -------------------------------
 @st.cache_data
 def load_data():
-    df = pd.read_excel("C:/Users/micno/OneDrive/Desktop/triune/app/Restructured_Data.xlsx")
+    # Make sure this file is inside your repo: /data/TNB_Competitor_Comparison.xlsx
+    df = pd.read_excel("data/TNB_Competitor_Comparison.xlsx")
     df.columns = df.columns.str.strip()
     return df
 
 try:
     df = load_data()
 except FileNotFoundError:
-    st.error("❌ Excel file not found. Please make sure the file is available.")
+    st.error("❌ Excel file not found. Please make sure the file exists in /data/.")
     st.stop()
 
 # -------------------------------
@@ -130,9 +131,9 @@ with tab2:
     )
 
     if "OPENAI_API_KEY" not in st.secrets:
-        st.error("⚠️ No OpenAI API key found. Please add it to `.streamlit/secrets.toml`.")
+        st.error("⚠️ No OpenAI API key found. Please add it to `.streamlit/secrets.toml` or Streamlit Cloud Secrets Manager.")
     else:
-        client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+        openai.api_key = st.secrets["OPENAI_API_KEY"]
 
         user_question = st.chat_input("💡 Ask me about GRD's or competitor models...")
 
@@ -160,7 +161,7 @@ with tab2:
             """
 
             try:
-                response = client.chat.completions.create(
+                response = openai.ChatCompletion.create(
                     model="gpt-4o-mini",
                     messages=[
                         {"role": "system", "content": "You are a helpful HVAC model comparison assistant."},
@@ -169,7 +170,7 @@ with tab2:
                     ],
                     temperature=0.2
                 )
-                answer = response.choices[0].message.content
+                answer = response.choices[0].message["content"]
 
                 st.session_state.chat_history.append({"role": "assistant", "content": answer})
                 with st.chat_message("assistant"):
