@@ -20,33 +20,35 @@ else:
     cache_func = st.cache  # fallback for older versions
 
 # -------------------------------
-# Load Data
+# Try GitHub load (cached)
 # -------------------------------
 @cache_func
-def load_data():
-    try:
-        # 🔗 Direct link to raw GitHub file (replace with your repo & branch!)
-        github_url = "https://raw.githubusercontent.com/MMicah-Git/Building-triunesolutions.net-GRD-s-Brand-Competitor-Model-Comparison/main/data/Restructured_Data_With_Titus.xlsx"
-        
-        df = pd.read_excel(github_url)
-        st.success("✅ Loaded dataset from GitHub.")
-    except Exception:
-        st.warning("⚠️ Could not load from GitHub. Please upload the file manually.")
-        uploaded_file = st.sidebar.file_uploader("📂 Upload Excel File", type=["xlsx"])
-        if uploaded_file is not None:
-            df = pd.read_excel(uploaded_file)
-            st.success("✅ Loaded dataset from uploaded file.")
-        else:
-            return None
-
-    # 🔑 Clean up blanks
+def load_from_github():
+    github_url = "https://raw.githubusercontent.com/MMicah-Git/Building-triunesolutions.net-GRD-s-Brand-Competitor-Model-Comparison/main/data/Restructured_Data_With_Titus.xlsx"
+    df = pd.read_excel(github_url)
     df.columns = df.columns.str.strip()
     df = df.dropna(how="all")
     if "TNB Model" in df.columns:
         df = df[df["TNB Model"].notna()]
     return df
 
-df = load_data()
+# -------------------------------
+# Load Data Logic
+# -------------------------------
+df = None
+try:
+    df = load_from_github()
+    st.success("✅ Loaded dataset from GitHub.")
+except Exception:
+    st.warning("⚠️ Could not load from GitHub. Please upload the file manually.")
+    uploaded_file = st.sidebar.file_uploader("📂 Upload Excel File", type=["xlsx"])
+    if uploaded_file is not None:
+        df = pd.read_excel(uploaded_file)
+        df.columns = df.columns.str.strip()
+        df = df.dropna(how="all")
+        if "TNB Model" in df.columns:
+            df = df[df["TNB Model"].notna()]
+        st.success("✅ Loaded dataset from uploaded file.")
 
 if df is None:
     st.error("❌ No data available. Please upload an Excel file.")
@@ -209,4 +211,3 @@ with tab2:
 
             except Exception as e:
                 st.error(f"❌ Chatbot Error: {e}")
-
